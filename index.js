@@ -1,4 +1,6 @@
 'use strict'
+const fs = require('fs');
+const path = require('path');
 
 module.exports = function GatheringMarkers(mod) {
 
@@ -6,13 +8,6 @@ module.exports = function GatheringMarkers(mod) {
     let config = null;
     
     let active = true,
-    enabled = true,
-    markenabled = true,
-    messager = false,
-    alerts = false,
-    Item_ID = 98260,
-    whiteList = [],
-    markList = [],
     marks = [],
     idMod = 2n;
 
@@ -41,19 +36,18 @@ module.exports = function GatheringMarkers(mod) {
     })
     
     mod.hook('S_SPAWN_COLLECTION', 4, (event) => {
-        if (!enabled || !active) return;
-        if (!whiteList.includes(event.id)) return false;
+        if (!config.enabled || !active) return;
+        if (!config.whiteList.includes(event.id)) return false;
 
-        if (markenabled) {   
-            if (markList.includes(event.id) && !marks.includes(event.gameId.toString())) {
+        if (config.markenabled) {
+            if (config.markList.includes(event.id) && !marks.includes(event.gameId.toString())) {
                 spawnMark(event.gameId*idMod, event.loc);
                 marks.push(event.gameId.toString());
             }
         }
         
-        if (alerts) notice('Found ' + map[event.id])
-        
-        if (messager) mod.command.message('Found ' + event.id)
+        if (config.alerts) notice('Found ' + map[event.id])
+        if (config.messager) mod.command.message('Found ' + map[event.id])
             
     })
         
@@ -69,20 +63,25 @@ module.exports = function GatheringMarkers(mod) {
 		marks = [];
 	})
 
-	function configInit() {
+	/*function configInit() {
         if (config) {
-            ({enabled,markenabled,messager,alerts,Item_ID,whiteList,markList} = config)
+            ({enabled,config.markenabled,config.messager,alerts,Item_ID,whiteList,markList} = config)
         } else {
             mod.command.message("Error: Unable to load config.json - Using default values for now");
         }
-    }
+    }*/
     
     function getConfigData(pathToFile) {
 		try {
 			config = JSON.parse(fs.readFileSync(path.join(__dirname, pathToFile)));
 		} catch (e) {
+			console.log(e);
 			config = {};
 		}
+    }
+    
+    function saveConfig(pathToFile, data) {
+		fs.writeFile(path.join(__dirname, pathToFile), JSON.stringify(data, null, '\t'), err => {});
 	}
 
 	function spawnMark(idRef, loc) {
@@ -90,7 +89,7 @@ module.exports = function GatheringMarkers(mod) {
 		mod.send('S_SPAWN_DROPITEM', 6, {
 			gameId: idRef,
 			loc: loc,
-			item: Item_ID, 
+			item: config.Item_ID, 
 			amount: 1,
 			expiry: 300000,
 			explode:false,
@@ -120,31 +119,33 @@ module.exports = function GatheringMarkers(mod) {
     mod.command.add('gathering', (p1)=> {
         if (p1) p1 = p1.toLowerCase();
         if (p1 == null) {
-            enabled = !enabled;
+            config.enabled = !config.enabled;
         } else if(p1 === 'reload') {
-            getConfigData(configPath)
-            mod.command.message('Config reloaded')
+            getConfigData(configPath);
+            mod.command.message('Config reloaded');
+        } else if(p1 === 'save') {
+            saveConfig(configPath, config);
         } else if (p1 === 'off') {
-            enabled = false;
+            config.enabled = false;
         } else if (p1 === 'on') {
-            enabled = true;
+            config.enabled = true;
         } else if (['alert', 'alerts'].includes(p1)) {
-			alerts = !alerts;
-			mod.command.message(alerts ? 'System popup notice enabled' : 'System popup notice disabled');
+			config.alerts = !config.alerts;
+			mod.command.message(config.alerts ? 'System popup notice enabled' : 'System popup notice disabled');
             return;
         } else if (['message', 'messages', 'proxy'].includes(p1)) {
-			messager = !messager;
-			mod.command.message(messager ? 'Proxy messages enabled' : 'Proxy messages disabled');
+			config.messager = !config.messager;
+			mod.command.message(config.messager ? 'Proxy messages enabled' : 'Proxy messages disabled');
             return;
         } else if (['mark', 'marks', 'marker', 'markers'].includes(p1)) {
-			markenabled = !markenabled;
-			mod.command.message(markenabled ? 'Item Markers enabled' : 'Item Markers disabled');
+			config.markenabled = !config.markenabled;
+			mod.command.message(config.markenabled ? 'Item Markers enabled' : 'Item Markers disabled');
             return;
         } else {
             mod.command.message(p1 +' is an invalid argument');
             return;
         }
-        mod.command.message(enabled ? 'Enabled' : 'Disabled');
+        mod.command.message(config.enabled ? 'Enabled' : 'Disabled');
     });
 
 }
