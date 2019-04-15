@@ -2,8 +2,8 @@
 	"files": {
         "config.json": {
             "overwrite": false,
-            "hash": "3bb86a08a3d40379db5c03d7d3c245fe0e16e02fdb55cb60cb1331c9557340d3"
+            "hash": "7eb77ab9b7f992d4486bca8c7d49c7c33dff93f47469f738c62848c27402ca7f"
         },
-        "index.js": "fc133c89ebdda49fa1f4a7a7040294a5949bf56291de45d03a6f07203e1207b8"
+        "index.js": "f23a0e8a9dd7725a0cb4d4d0fb04fe64397fc0c7767af3796f42b9e48581c156"
 	}
 }

@@ -1,7 +1,9 @@
 'use strict'
 
 module.exports = function GatheringMarkers(mod) {
-    const config = require('./config.json');
+
+    const configPath = './config.json';
+    let config = null;
     
     let active = true,
     enabled = true,
@@ -13,9 +15,29 @@ module.exports = function GatheringMarkers(mod) {
     markList = [],
     marks = [],
     idMod = 2n;
+
+    let map = new Map()
+    map[1] = 'Harmony Grass'
+    map[2] = 'Wild Cobseed'
+    map[3] = 'Veridia Root'
+    map[4] = 'Orange Mushroom'
+    map[5] = 'Moongourd'
+    map[6] = 'Apple Tree'
+    map[101] = 'Plain Stone'
+    map[102] = 'Cobala Ore'
+    map[103] = 'Shadmetal Ore'
+    map[104] = 'Xermetal Ore'
+    map[105] = 'Normetal Ore'
+    map[106] = 'Galborne Ore'
+    map[201] = 'Achromic Essence'
+    map[202] = 'Crimson Essence'
+    map[203] = 'Earth Essence'
+    map[204] = 'Azure Essence'
+    map[205] = 'Opal Essence'
+    map[206] = 'Obsidian Essence'
     
     mod.hook('S_LOGIN', 10, (event) => {
-        configInit();
+        getConfigData(configPath);
     })
     
     mod.hook('S_SPAWN_COLLECTION', 4, (event) => {
@@ -29,7 +51,7 @@ module.exports = function GatheringMarkers(mod) {
             }
         }
         
-        if (alerts) notice('Found ' + event.id)
+        if (alerts) notice('Found ' + map[event.id])
         
         if (messager) mod.command.message('Found ' + event.id)
             
@@ -53,6 +75,14 @@ module.exports = function GatheringMarkers(mod) {
         } else {
             mod.command.message("Error: Unable to load config.json - Using default values for now");
         }
+    }
+    
+    function getConfigData(pathToFile) {
+		try {
+			config = JSON.parse(fs.readFileSync(path.join(__dirname, pathToFile)));
+		} catch (e) {
+			config = {};
+		}
 	}
 
 	function spawnMark(idRef, loc) {
@@ -91,6 +121,9 @@ module.exports = function GatheringMarkers(mod) {
         if (p1) p1 = p1.toLowerCase();
         if (p1 == null) {
             enabled = !enabled;
+        } else if(p1 === 'reload') {
+            getConfigData(configPath)
+            mod.command.message('Config reloaded')
         } else if (p1 === 'off') {
             enabled = false;
         } else if (p1 === 'on') {
@@ -110,7 +143,7 @@ module.exports = function GatheringMarkers(mod) {
         } else {
             mod.command.message(p1 +' is an invalid argument');
             return;
-        }        
+        }
         mod.command.message(enabled ? 'Enabled' : 'Disabled');
     });
 
