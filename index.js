@@ -86,7 +86,7 @@ module.exports = function GatheringMarkers(mod) {
 
 	function spawnMark(idRef, loc) {
         loc.z -= 100;
-		mod.send('S_SPAWN_DROPITEM', 6, {
+		mod.send('S_SPAWN_DROPITEM', 7, {
 			gameId: idRef,
 			loc: loc,
 			item: config.Item_ID, 
@@ -125,6 +125,7 @@ module.exports = function GatheringMarkers(mod) {
             mod.command.message('Config reloaded');
         } else if(p1 === 'save') {
             saveConfig(configPath, config);
+            mod.command.message('Config saved');
         } else if (p1 === 'off') {
             config.enabled = false;
         } else if (p1 === 'on') {
